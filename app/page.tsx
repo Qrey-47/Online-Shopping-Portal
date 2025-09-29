@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -13,10 +16,18 @@ import {
   Search,
 } from "lucide-react"
 import Link from "next/link"
+import UserMenu from "@/components/UserMenu" // adjust path if needed
 // ✅ import your real product data here:
 import { products } from "./data/products"
 
 export default function HomePage() {
+  const [user, setUser] = useState<{ firstName: string } | null>(null)
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) setUser(JSON.parse(storedUser))
+  }, [])
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -32,6 +43,7 @@ export default function HomePage() {
             </div>
 
             {/* Search */}
+            {/* Search */}
             <div className="hidden lg:flex flex-1 max-w-md mx-8">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -45,6 +57,16 @@ export default function HomePage() {
             0
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-10">
+              {["Shop", "Men", "Women", "Kids"].map((item) => (
+                <a
+                  key={item}
+                  href="#"
+                  className="text-foreground hover:text-primary transition-all duration-300 font-serif relative group"
+                >
+                  {item}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                </a>
+              ))}
               {["Shop", "Men", "Women", "Kids"].map((nav, idx) => (
                 <a
                   key={idx}
@@ -67,13 +89,23 @@ export default function HomePage() {
                 <Search className="w-5 h-5 text-foreground" />
               </Button>
 
-              <Link href="/login">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-serif px-6 py-2 rounded-full transition-all duration-300 hidden sm:flex">
-                  <User className="w-4 h-4 mr-2" />
-                  Login
-                </Button>
-              </Link>
-              <Button size="sm" variant="ghost" className="hover:scale-110 transition-transform duration-300 p-2">
+              {/* LOGIN OR USER MENU */}
+              {user ? (
+                <UserMenu user={user} />
+              ) : (
+                <Link href="/login">
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-serif px-6 py-2 rounded-full transition-all duration-300 hidden sm:flex">
+                    <User className="w-4 h-4 mr-2" />
+                    Login
+                  </Button>
+                </Link>
+              )}
+
+              <Button
+                size="sm"
+                variant="ghost"
+                className="hover:scale-110 transition-transform duration-300 p-2"
+              >
                 <ShoppingCart className="w-5 h-5 text-foreground" />
               </Button>
 
@@ -196,15 +228,163 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trust Building Section */}
+      {/* Trust Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h3 className="text-4xl lg:text-5xl font-bold text-foreground mb-6 font-sans">Why Choose SATTVA SKIN?</h3>
+            <p className="text-xl text-muted-foreground font-serif max-w-2xl mx-auto">
+              Trusted by thousands worldwide for natural, effective skincare solutions
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+            {[
+              {
+                icon: Leaf,
+                title: "100% Natural",
+                description: "Organic ingredients sourced sustainably from nature's finest sources",
+              },
+              {
+                icon: Award,
+                title: "Award Winning",
+                description: "Recognized globally for excellence in natural skincare innovation",
+              },
+              {
+                icon: Shield,
+                title: "Dermatologist Tested",
+                description: "Clinically proven safe and effective for all skin types",
+              },
+            ].map((feature, index) => (
+              <div key={index} className="text-center group hover:-translate-y-2 transition-transform duration-300">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors duration-300">
+                  <feature.icon className="w-10 h-10 text-primary" />
+                </div>
+                <h4 className="font-bold text-xl text-foreground mb-4 font-sans">{feature.title}</h4>
+                <p className="text-muted-foreground font-serif leading-relaxed">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Customer Testimonials */}
+          <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-3xl p-12 border border-primary/10">
+            <h4 className="text-3xl lg:text-4xl font-bold text-center text-foreground mb-12 font-sans">
+              What Our Customers Say
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  name: "Sarah M.",
+                  review:
+                    "My skin has never looked better! The natural ingredients make such a difference. I'm glowing!",
+                  rating: 5,
+                  location: "New York",
+                },
+                {
+                  name: "Emily R.",
+                  review:
+                    "Love the gentle formula. Perfect for my sensitive skin. Finally found my holy grail products!",
+                  rating: 5,
+                  location: "California",
+                },
+                {
+                  name: "Jessica L.",
+                  review:
+                    "Amazing results in just two weeks. Highly recommend to anyone looking for natural skincare!",
+                  rating: 5,
+                  location: "Texas",
+                },
+              ].map((testimonial, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                >
+                  <div className="flex justify-center mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+                    ))}
+                  </div>
+                  <p className="text-muted-foreground italic mb-6 font-serif leading-relaxed">
+                    "{testimonial.review}"
+                  </p>
+                  <div className="text-center">
+                    <p className="font-bold text-foreground font-sans">{testimonial.name}</p>
+                    <p className="text-sm text-muted-foreground font-serif">{testimonial.location}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
           {/* ...unchanged trust building & testimonials section... */}
         </div>
       </section>
 
       {/* Footer */}
       <footer className="bg-primary text-primary-foreground py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-primary-foreground/10 rounded-full flex items-center justify-center">
+                  <Leaf className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <h5 className="text-xl font-bold font-sans">SATTVA SKIN</h5>
+              </div>
+              <p className="text-primary-foreground/80 font-serif">Natural skincare for your beautiful journey.</p>
+            </div>
+
+            <div>
+              <h6 className="font-semibold mb-4 font-sans">Quick Links</h6>
+              <ul className="space-y-2 font-serif">
+                {["About Us", "Products", "Reviews", "Contact"].map((item) => (
+                  <li key={item}>
+                    <a
+                      href="#"
+                      className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                    >
+                      {item}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h6 className="font-semibold mb-4 font-sans">Customer Care</h6>
+              <ul className="space-y-2 font-serif">
+                {["Shipping Info", "Returns", "FAQ", "Support"].map((item) => (
+                  <li key={item}>
+                    <a
+                      href="#"
+                      className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                    >
+                      {item}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h6 className="font-semibold mb-4 font-sans">Newsletter</h6>
+              <p className="text-primary-foreground/80 mb-4 font-serif">Get skincare tips and exclusive offers.</p>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="Your email"
+                  className="flex-1 px-3 py-2 rounded bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/60 border border-primary-foreground/20 font-serif"
+                />
+                <Button variant="secondary" size="sm" className="font-serif">
+                  Subscribe
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
+            <p className="text-primary-foreground/80 font-serif">© 2024 SATTVA SKIN. All rights reserved.</p>
+          </div>
+        </div>
         {/* ...unchanged footer... */}
       </footer>
     </div>
