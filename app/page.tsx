@@ -1,9 +1,31 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShoppingCart, User, Star, Leaf, Award, Shield, Menu, Heart, Sparkles, Search } from "lucide-react"
+import {
+  ShoppingCart,
+  User,
+  Star,
+  Leaf,
+  Award,
+  Shield,
+  Menu,
+  Heart,
+  Sparkles,
+  Search,
+} from "lucide-react"
 import Link from "next/link"
+import UserMenu from "@/components/UserMenu" // adjust path if needed
 
 export default function HomePage() {
+  const [user, setUser] = useState<{ firstName: string } | null>(null)
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) setUser(JSON.parse(storedUser))
+  }, [])
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -18,6 +40,7 @@ export default function HomePage() {
               <h1 className="text-2xl font-bold text-primary font-sans">SATTVA SKIN</h1>
             </div>
 
+            {/* Search */}
             <div className="hidden lg:flex flex-1 max-w-md mx-8">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -31,34 +54,16 @@ export default function HomePage() {
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-10">
-              <a
-                href="#"
-                className="text-foreground hover:text-primary transition-all duration-300 font-serif relative group"
-              >
-                Shop
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a
-                href="#"
-                className="text-foreground hover:text-primary transition-all duration-300 font-serif relative group"
-              >
-                Men
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a
-                href="#"
-                className="text-foreground hover:text-primary transition-all duration-300 font-serif relative group"
-              >
-                Women
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-              </a>
-              <a
-                href="#"
-                className="text-foreground hover:text-primary transition-all duration-300 font-serif relative group"
-              >
-                Kids
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-              </a>
+              {["Shop", "Men", "Women", "Kids"].map((item) => (
+                <a
+                  key={item}
+                  href="#"
+                  className="text-foreground hover:text-primary transition-all duration-300 font-serif relative group"
+                >
+                  {item}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                </a>
+              ))}
             </nav>
 
             {/* Actions */}
@@ -71,17 +76,26 @@ export default function HomePage() {
                 <Search className="w-5 h-5 text-foreground" />
               </Button>
 
-              <Link href="/login">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-serif px-6 py-2 rounded-full transition-all duration-300 hidden sm:flex">
-                  <User className="w-4 h-4 mr-2" />
-                  Login
-                </Button>
-              </Link>
-              <Button size="sm" variant="ghost" className="hover:scale-110 transition-transform duration-300 p-2">
+              {/* LOGIN OR USER MENU */}
+              {user ? (
+                <UserMenu user={user} />
+              ) : (
+                <Link href="/login">
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-serif px-6 py-2 rounded-full transition-all duration-300 hidden sm:flex">
+                    <User className="w-4 h-4 mr-2" />
+                    Login
+                  </Button>
+                </Link>
+              )}
+
+              <Button
+                size="sm"
+                variant="ghost"
+                className="hover:scale-110 transition-transform duration-300 p-2"
+              >
                 <ShoppingCart className="w-5 h-5 text-foreground" />
               </Button>
 
-              {/* Mobile hamburger menu */}
               <Button size="sm" variant="ghost" className="md:hidden p-2">
                 <Menu className="w-5 h-5 text-foreground" />
               </Button>
@@ -224,7 +238,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trust Building Section */}
+      {/* Trust Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -285,7 +299,8 @@ export default function HomePage() {
                 },
                 {
                   name: "Jessica L.",
-                  review: "Amazing results in just two weeks. Highly recommend to anyone looking for natural skincare!",
+                  review:
+                    "Amazing results in just two weeks. Highly recommend to anyone looking for natural skincare!",
                   rating: 5,
                   location: "Texas",
                 },
@@ -299,7 +314,9 @@ export default function HomePage() {
                       <Star key={i} className="w-5 h-5 fill-primary text-primary" />
                     ))}
                   </div>
-                  <p className="text-muted-foreground italic mb-6 font-serif leading-relaxed">"{testimonial.review}"</p>
+                  <p className="text-muted-foreground italic mb-6 font-serif leading-relaxed">
+                    "{testimonial.review}"
+                  </p>
                   <div className="text-center">
                     <p className="font-bold text-foreground font-sans">{testimonial.name}</p>
                     <p className="text-sm text-muted-foreground font-serif">{testimonial.location}</p>
@@ -328,52 +345,32 @@ export default function HomePage() {
             <div>
               <h6 className="font-semibold mb-4 font-sans">Quick Links</h6>
               <ul className="space-y-2 font-serif">
-                <li>
-                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                    Products
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                    Reviews
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                    Contact
-                  </a>
-                </li>
+                {["About Us", "Products", "Reviews", "Contact"].map((item) => (
+                  <li key={item}>
+                    <a
+                      href="#"
+                      className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                    >
+                      {item}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
 
             <div>
               <h6 className="font-semibold mb-4 font-sans">Customer Care</h6>
               <ul className="space-y-2 font-serif">
-                <li>
-                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                    Shipping Info
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                    Returns
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                    FAQ
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                    Support
-                  </a>
-                </li>
+                {["Shipping Info", "Returns", "FAQ", "Support"].map((item) => (
+                  <li key={item}>
+                    <a
+                      href="#"
+                      className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                    >
+                      {item}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
 
