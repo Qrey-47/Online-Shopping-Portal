@@ -1,36 +1,35 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { useCart } from "@/context/CartContext"
+import { useRef, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ShoppingCart, User, Star, Heart, Sparkles, Search, Menu } from "lucide-react";
+import Link from "next/link";
+import UserMenu from "@/components/UserMenu";
+import { products } from "./data/products";
 
-import {
-  ShoppingCart,
-  User,
-  Star,
-  Leaf,
-  Award,
-  Shield,
-  Menu,
-  Heart,
-  Sparkles,
-  Search,
-} from "lucide-react"
-import Link from "next/link"
-import UserMenu from "@/components/UserMenu"
-import { products } from "./data/products"
-
-// ✅ define nav items once
-const navItems = ["Shop", "Men", "Women", "Kids"]
+const navItems = ["Shop", "Men", "Women", "Kids"];
 
 export default function HomePage() {
-  const [user, setUser] = useState<{ firstName: string } | null>(null)
+  const [user, setUser] = useState<{ firstName: string } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const bestSellersRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) setUser(JSON.parse(storedUser))
-  }, [])
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+  }, []);
+
+  useEffect(() => {
+    if (searchTerm) {
+      const section = document.getElementById("shop");
+      section?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [searchTerm]);
+
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -40,9 +39,11 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center shadow-lg border border-primary/20">
-                <Leaf className="w-6 h-6 text-primary" />
-              </div>
+              <img
+                src="/logosattva.jpg"
+                alt="SATTVA SKIN Logo"
+                className="w-12 h-12 rounded-full object-cover shadow-lg border border-primary/20"
+              />
               <h1 className="text-2xl font-bold text-primary font-sans">SATTVA SKIN</h1>
             </div>
 
@@ -53,6 +54,8 @@ export default function HomePage() {
                 <input
                   type="text"
                   placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-border rounded-full bg-background/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-serif text-sm"
                 />
               </div>
@@ -61,44 +64,32 @@ export default function HomePage() {
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-10">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item}
-                  href="#"
+                  href={item === "Shop" ? "/#shop" : `/${item.toLowerCase()}`}
                   className="text-foreground hover:text-primary transition-all duration-300 font-serif relative group"
                 >
                   {item}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-                </a>
+                </Link>
               ))}
             </nav>
 
             {/* Actions */}
             <div className="flex items-center gap-4">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="lg:hidden hover:scale-110 transition-transform duration-300 p-2"
-              >
+              <Button size="sm" variant="ghost" className="lg:hidden hover:scale-110 transition-transform duration-300 p-2">
                 <Search className="w-5 h-5 text-foreground" />
               </Button>
 
-              {/* LOGIN OR USER MENU */}
-              {user ? (
-                <UserMenu user={user} />
-              ) : (
+              {user ? <UserMenu user={user} /> : (
                 <Link href="/login">
                   <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-serif px-6 py-2 rounded-full transition-all duration-300 hidden sm:flex">
-                    <User className="w-4 h-4 mr-2" />
-                    Login
+                    <User className="w-4 h-4 mr-2" /> Login
                   </Button>
                 </Link>
               )}
 
-              <Button
-                size="sm"
-                variant="ghost"
-                className="hover:scale-110 transition-transform duration-300 p-2"
-              >
+              <Button size="sm" variant="ghost" className="hover:scale-110 transition-transform duration-300 p-2">
                 <ShoppingCart className="w-5 h-5 text-foreground" />
               </Button>
 
@@ -128,9 +119,7 @@ export default function HomePage() {
               <div className="flex justify-center mb-6">
                 <div className="flex items-center gap-2 bg-primary px-4 py-2 rounded-full">
                   <Sparkles className="w-4 h-4 text-primary-foreground" />
-                  <span className="text-sm font-serif text-primary-foreground">
-                    Premium Natural Skincare
-                  </span>
+                  <span className="text-sm font-serif text-primary-foreground">Premium Natural Skincare</span>
                 </div>
               </div>
               <h2 className="text-5xl lg:text-7xl font-bold text-foreground mb-8 font-sans leading-tight">
@@ -139,15 +128,16 @@ export default function HomePage() {
               </h2>
               <p className="text-xl lg:text-2xl text-muted-foreground mb-10 font-serif leading-relaxed max-w-2xl mx-auto">
                 Discover the transformative power of organic ingredients with our luxurious skincare collection.
-                Crafted with love, designed for your skin&apos;s natural radiance.
+                Crafted with love, designed for your skin's natural radiance.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-serif px-10 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  Shop Collection
-                </Button>
+                <a href="#shop">
+                  <Button
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-serif px-10 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    Shop Collection
+                  </Button>
+                </a>
                 <Button
                   size="lg"
                   variant="outline"
@@ -161,8 +151,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-20 bg-card/50">
+      {/* Featured Products / Best Sellers */}
+      <section id="shop" className="py-20 bg-card/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <div className="flex justify-center mb-4">
@@ -178,140 +168,51 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product) => (
-              <Link key={product.slug} href={`/products/${product.slug}`} className="group">
-                <Card className="hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-0 shadow-lg bg-white">
-                  <CardContent className="p-0">
-                    <div className="relative">
-                      <div className="aspect-square rounded-t-lg overflow-hidden bg-muted">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-serif">
-                          {product.badge}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <h4 className="font-bold text-lg text-foreground mb-3 font-serif">{product.name}</h4>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-primary font-bold text-xl font-sans">{product.price}</span>
-                          <span className="text-muted-foreground line-through text-sm font-sans">
-                            {product.originalPrice}
-                          </span>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <Link key={product.slug} href={`/products/${product.slug}`} className="group">
+                  <Card className="hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-0 shadow-lg bg-white">
+                    <CardContent className="p-0">
+                      <div className="relative">
+                        <div className="aspect-square rounded-t-lg overflow-hidden bg-muted">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
                         </div>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                          ))}
-                        </div>
+                        {product.badge && (
+                          <div className="absolute top-4 left-4">
+                            <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-serif">
+                              {product.badge}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-serif rounded-full py-3 transition-all duration-300 hover:shadow-lg">
-                        Add to Cart
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h3 className="text-4xl lg:text-5xl font-bold text-foreground mb-6 font-sans">Why Choose SATTVA SKIN?</h3>
-            <p className="text-xl text-muted-foreground font-serif max-w-2xl mx-auto">
-              Trusted by thousands worldwide for natural, effective skincare solutions
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            {[
-              {
-                icon: Leaf,
-                title: "100% Natural",
-                description: "Organic ingredients sourced sustainably from nature's finest sources",
-              },
-              {
-                icon: Award,
-                title: "Award Winning",
-                description: "Recognized globally for excellence in natural skincare innovation",
-              },
-              {
-                icon: Shield,
-                title: "Dermatologist Tested",
-                description: "Clinically proven safe and effective for all skin types",
-              },
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className="text-center group hover:-translate-y-2 transition-transform duration-300"
-              >
-                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors duration-300">
-                  <feature.icon className="w-10 h-10 text-primary" />
-                </div>
-                <h4 className="font-bold text-xl text-foreground mb-4 font-sans">{feature.title}</h4>
-                <p className="text-muted-foreground font-serif leading-relaxed">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Customer Testimonials */}
-          <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-3xl p-12 border border-primary/10">
-            <h4 className="text-3xl lg:text-4xl font-bold text-center text-foreground mb-12 font-sans">
-              What Our Customers Say
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                {
-                  name: "Sarah M.",
-                  review:
-                    "My skin has never looked better! The natural ingredients make such a difference. I'm glowing!",
-                  rating: 5,
-                  location: "New York",
-                },
-                {
-                  name: "Emily R.",
-                  review:
-                    "Love the gentle formula. Perfect for my sensitive skin. Finally found my holy grail products!",
-                  rating: 5,
-                  location: "California",
-                },
-                {
-                  name: "Jessica L.",
-                  review:
-                    "Amazing results in just two weeks. Highly recommend to anyone looking for natural skincare!",
-                  rating: 5,
-                  location: "Texas",
-                },
-              ].map((testimonial, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
-                >
-                  <div className="flex justify-center mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground italic mb-6 font-serif leading-relaxed">
-                    "{testimonial.review}"
-                  </p>
-                  <div className="text-center">
-                    <p className="font-bold text-foreground font-sans">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground font-serif">{testimonial.location}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                      <div className="p-6">
+                        <h4 className="font-bold text-lg text-foreground mb-3 font-serif">{product.name}</h4>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-primary font-bold text-xl font-sans">{product.price}</span>
+                            <span className="text-muted-foreground line-through text-sm font-sans">{product.originalPrice}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                            ))}
+                          </div>
+                        </div>
+                        <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-serif rounded-full py-3 transition-all duration-300 hover:shadow-lg">
+                          Add to Cart
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground col-span-full">No products found</p>
+            )}
           </div>
         </div>
       </section>
@@ -322,73 +223,49 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-primary-foreground/10 rounded-full flex items-center justify-center">
-                  <Leaf className="w-5 h-5 text-primary-foreground" />
-                </div>
+                <img src="/logosattva.jpg" alt="SATTVA SKIN Logo" className="w-10 h-10 rounded-full object-cover" />
                 <h5 className="text-xl font-bold font-sans">SATTVA SKIN</h5>
               </div>
-              <p className="text-primary-foreground/80 font-serif">
-                Natural skincare for your beautiful journey.
-              </p>
+              <p className="text-primary-foreground/80 font-serif">Natural skincare for your beautiful journey.</p>
             </div>
-
             <div>
               <h6 className="font-semibold mb-4 font-sans">Quick Links</h6>
               <ul className="space-y-2 font-serif">
                 {["About Us", "Products", "Reviews", "Contact"].map((item) => (
                   <li key={item}>
-                    <a
-                      href="#"
-                      className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                    >
-                      {item}
-                    </a>
+                    <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">{item}</a>
                   </li>
                 ))}
               </ul>
             </div>
-
             <div>
               <h6 className="font-semibold mb-4 font-sans">Customer Care</h6>
               <ul className="space-y-2 font-serif">
                 {["Shipping Info", "Returns", "FAQ", "Support"].map((item) => (
                   <li key={item}>
-                    <a
-                      href="#"
-                      className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                    >
-                      {item}
-                    </a>
+                    <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">{item}</a>
                   </li>
                 ))}
               </ul>
             </div>
-
             <div>
               <h6 className="font-semibold mb-4 font-sans">Newsletter</h6>
-              <p className="text-primary-foreground/80 mb-4 font-serif">
-                Get skincare tips and exclusive offers.
-              </p>
+              <p className="text-primary-foreground/80 mb-4 font-serif">Get skincare tips and exclusive offers.</p>
               <div className="flex gap-2">
                 <input
                   type="email"
                   placeholder="Your email"
                   className="flex-1 px-3 py-2 rounded bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/60 border border-primary-foreground/20 font-serif"
                 />
-                <Button variant="secondary" size="sm" className="font-serif">
-                  Subscribe
-                </Button>
+                <Button variant="secondary" size="sm" className="font-serif">Subscribe</Button>
               </div>
             </div>
           </div>
-
           <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
-            <p className="text-primary-foreground/80 font-serif">
-              © 2024 SATTVA SKIN. All rights reserved.
-            </p>
+            <p className="text-primary-foreground/80 font-serif">© 2024 SATTVA SKIN. All rights reserved.</p>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }
