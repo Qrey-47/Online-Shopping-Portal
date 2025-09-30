@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Manrope } from "next/font/google"
 import "./globals.css"
+import { CartProvider } from "@/app/context/CartContext" // <-- import your context
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,17 +22,15 @@ export const metadata: Metadata = {
   generator: "v0.app",
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${manrope.variable} antialiased`}
-    >
-      <body>{children}</body>
+    <html lang="en" className={`${inter.variable} ${manrope.variable} antialiased`}>
+      <body>
+        {/* CartProvider wraps all pages so cart state is accessible globally */}
+        <CartProvider>
+          {children}
+        </CartProvider>
+      </body>
     </html>
   )
 }

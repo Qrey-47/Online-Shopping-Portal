@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { useCart } from "@/context/CartContext"
+
 import {
   ShoppingCart,
   User,
@@ -16,9 +18,11 @@ import {
   Search,
 } from "lucide-react"
 import Link from "next/link"
-import UserMenu from "@/components/UserMenu" // adjust path if needed
-// ✅ import your real product data here:
+import UserMenu from "@/components/UserMenu"
 import { products } from "./data/products"
+
+// ✅ define nav items once
+const navItems = ["Shop", "Men", "Women", "Kids"]
 
 export default function HomePage() {
   const [user, setUser] = useState<{ firstName: string } | null>(null)
@@ -43,7 +47,6 @@ export default function HomePage() {
             </div>
 
             {/* Search */}
-            {/* Search */}
             <div className="hidden lg:flex flex-1 max-w-md mx-8">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -54,26 +57,16 @@ export default function HomePage() {
                 />
               </div>
             </div>
-            0
+
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-10">
-              {["Shop", "Men", "Women", "Kids"].map((item) => (
+              {navItems.map((item) => (
                 <a
                   key={item}
                   href="#"
                   className="text-foreground hover:text-primary transition-all duration-300 font-serif relative group"
                 >
                   {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-                </a>
-              ))}
-              {["Shop", "Men", "Women", "Kids"].map((nav, idx) => (
-                <a
-                  key={idx}
-                  href="#"
-                  className="text-foreground hover:text-primary transition-all duration-300 font-serif relative group"
-                >
-                  {nav}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                 </a>
               ))}
@@ -135,7 +128,9 @@ export default function HomePage() {
               <div className="flex justify-center mb-6">
                 <div className="flex items-center gap-2 bg-primary px-4 py-2 rounded-full">
                   <Sparkles className="w-4 h-4 text-primary-foreground" />
-                  <span className="text-sm font-serif text-primary-foreground">Premium Natural Skincare</span>
+                  <span className="text-sm font-serif text-primary-foreground">
+                    Premium Natural Skincare
+                  </span>
                 </div>
               </div>
               <h2 className="text-5xl lg:text-7xl font-bold text-foreground mb-8 font-sans leading-tight">
@@ -144,7 +139,7 @@ export default function HomePage() {
               </h2>
               <p className="text-xl lg:text-2xl text-muted-foreground mb-10 font-serif leading-relaxed max-w-2xl mx-auto">
                 Discover the transformative power of organic ingredients with our luxurious skincare collection.
-                Crafted with love, designed for your skin's natural radiance.
+                Crafted with love, designed for your skin&apos;s natural radiance.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
@@ -256,7 +251,10 @@ export default function HomePage() {
                 description: "Clinically proven safe and effective for all skin types",
               },
             ].map((feature, index) => (
-              <div key={index} className="text-center group hover:-translate-y-2 transition-transform duration-300">
+              <div
+                key={index}
+                className="text-center group hover:-translate-y-2 transition-transform duration-300"
+              >
                 <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors duration-300">
                   <feature.icon className="w-10 h-10 text-primary" />
                 </div>
@@ -315,7 +313,6 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-          {/* ...unchanged trust building & testimonials section... */}
         </div>
       </section>
 
@@ -330,7 +327,9 @@ export default function HomePage() {
                 </div>
                 <h5 className="text-xl font-bold font-sans">SATTVA SKIN</h5>
               </div>
-              <p className="text-primary-foreground/80 font-serif">Natural skincare for your beautiful journey.</p>
+              <p className="text-primary-foreground/80 font-serif">
+                Natural skincare for your beautiful journey.
+              </p>
             </div>
 
             <div>
@@ -367,7 +366,9 @@ export default function HomePage() {
 
             <div>
               <h6 className="font-semibold mb-4 font-sans">Newsletter</h6>
-              <p className="text-primary-foreground/80 mb-4 font-serif">Get skincare tips and exclusive offers.</p>
+              <p className="text-primary-foreground/80 mb-4 font-serif">
+                Get skincare tips and exclusive offers.
+              </p>
               <div className="flex gap-2">
                 <input
                   type="email"
@@ -382,10 +383,11 @@ export default function HomePage() {
           </div>
 
           <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
-            <p className="text-primary-foreground/80 font-serif">© 2024 SATTVA SKIN. All rights reserved.</p>
+            <p className="text-primary-foreground/80 font-serif">
+              © 2024 SATTVA SKIN. All rights reserved.
+            </p>
           </div>
         </div>
-        {/* ...unchanged footer... */}
       </footer>
     </div>
   )
