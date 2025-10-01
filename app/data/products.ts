@@ -5,7 +5,8 @@ export const products = [
   {
     name: "Organic Shampoo",
     slug: "organic-shampoo",
-    image: "/images/shop/organic-shampoo.jpg",
+    image: "/organicshampoo.jpg",
+
     price: "$20",
     originalPrice: "$25",
     badge: "Best Seller",
