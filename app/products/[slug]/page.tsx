@@ -4,72 +4,242 @@ import { useState, useEffect } from "react"
 import { products } from "@/app/data/products"
 import Navbar from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
-import { Star } from "lucide-react"
+import { Star, ChevronLeft, ChevronRight } from "lucide-react"
 import { notFound } from "next/navigation"
 
-export default function page({ params }: { params: { slug: string } }) {
+export default function ProductPage({ params }: { params: { slug: string } }) {
   const product = products.find((p) => p.slug === params.slug)
   if (!product) return notFound()
 
   const [cartCount, setCartCount] = useState(0)
+  const [currentImage, setCurrentImage] = useState(0)
+  const [quantity, setQuantity] = useState(1)
+  const [activeTab, setActiveTab] = useState<"ingredients" | "benefits" | "howToUse">("ingredients")
+  const [prevTab, setPrevTab] = useState(activeTab)
+  const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(null)
+
+  const productImages = Array.isArray(product.image) ? product.image : [product.image]
 
   useEffect(() => {
     const storedCart = localStorage.getItem("cart")
     if (storedCart) setCartCount(JSON.parse(storedCart).length)
   }, [])
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (qty: number) => {
     const storedCart = localStorage.getItem("cart")
     const cart = storedCart ? JSON.parse(storedCart) : []
-    cart.push(product)
+    for (let i = 0; i < qty; i++) cart.push(product)
     localStorage.setItem("cart", JSON.stringify(cart))
     setCartCount(cart.length)
-    alert(`${product.name} added to cart!`)
+    alert(`${qty} x ${product.name} added to cart!`)
   }
 
-  const averageRating =
-    product.reviews && product.reviews.length > 0
-      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-      : 0
+  const handleBuyNow = (qty: number) => {
+    handleAddToCart(qty)
+    alert("Proceeding to checkout...")
+  }
+
+  const getDeliveryDate = () => {
+    const today = new Date()
+    today.setDate(today.getDate() + 3)
+    return today.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  const nextImage = () => setCurrentImage((prev) => (prev + 1) % productImages.length)
+  const prevImage = () => setCurrentImage((prev) => (prev - 1 + productImages.length) % productImages.length)
+
+  const handleTabClick = (tab: "ingredients" | "benefits" | "howToUse") => {
+    setPrevTab(activeTab)
+    setActiveTab(tab)
+  }
+
+  const getDirection = (tab: string) => {
+    const tabsOrder = ["ingredients", "benefits", "howToUse"]
+    return tabsOrder.indexOf(tab) > tabsOrder.indexOf(prevTab) ? "right" : "left"
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-gray-50">
+      <Navbar cartCount={cartCount} />
 
-      <section className="py-20">
-        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12">
-          <img src={product.image} alt={product.name} className="w-full rounded-2xl shadow-lg object-cover" />
-          <div>
-            <h1 className="text-4xl font-bold mb-2">{product.name}</h1>
+      {/* Product Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
 
-            {averageRating > 0 && (
-              <div className="flex items-center gap-2 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 ${
-                      i < Math.round(averageRating) ? "fill-primary text-primary" : "text-muted-foreground"
-                    }`}
-                  />
-                ))}
-                <span className="text-sm text-muted-foreground">
-                  {averageRating.toFixed(1)} / 5 ({product.reviews.length} reviews)
-                </span>
+          {/* Product Image */}
+          <div className="relative group">
+            <img
+              src={productImages[currentImage]}
+              alt={product.name}
+              className="w-full h-[450px] md:h-[550px] lg:h-[600px] object-cover rounded-xl shadow-xl transition-transform duration-500 group-hover:scale-105"
+            />
+
+            {product.badge && (
+              <div className="absolute top-4 left-4 bg-[#0F5132] text-white font-bold px-4 py-1 rounded-lg shadow-lg text-sm tracking-wide">
+                {product.badge}
               </div>
             )}
 
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-primary font-bold text-2xl">{product.price}</span>
-              <span className="text-muted-foreground line-through">{product.originalPrice}</span>
+            {productImages.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100 transition"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100 transition"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Product Info + Tabs */}
+          <div className="flex flex-col justify-start space-y-6">
+            <h1 className="text-4xl font-extrabold text-gray-900">{product.name}</h1>
+
+            {/* Rating */}
+            <div className="flex items-center gap-2">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-5 h-5 ${i < Math.round(product.rating) ? "fill-[#0F5132] text-[#0F5132]" : "text-gray-300"}`}
+                />
+              ))}
+              <span className="text-gray-500 text-sm">{product.rating.toFixed(1)} / 5 ({product.reviews} reviews)</span>
             </div>
 
-            <p className="text-muted-foreground mb-8 leading-relaxed">{product.description}</p>
+            {/* Price */}
+            <div className="flex items-center gap-3">
+              <span className="text-[#0F5132] font-bold text-3xl">{product.price}</span>
+              <span className="text-gray-400 line-through text-lg">{product.originalPrice}</span>
+            </div>
 
-            <Button className="bg-primary text-primary-foreground rounded-full px-6 py-3" onClick={handleAddToCart}>
-              Add to Cart
-            </Button>
+            {/* Description */}
+            <p className="text-gray-600 leading-relaxed">{product.description}</p>
+
+            {/* Tabs */}
+            <div className="mt-6">
+              <div className="flex gap-4 border-b border-gray-200">
+                {["ingredients", "benefits", "howToUse"].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`pb-2 font-semibold ${activeTab === tab ? "border-b-2 border-[#0F5132] text-[#0F5132]" : "text-gray-600"}`}
+                    onClick={() => handleTabClick(tab as any)}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, " $1")}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tab Content */}
+              <div className="mt-4 bg-white p-4 rounded-xl shadow overflow-hidden relative">
+                {["ingredients", "benefits", "howToUse"].map((tab) => {
+                  const isActive = activeTab === tab
+                  const direction = getDirection(tab)
+                  return (
+                    <div
+                      key={tab}
+                      className={`transition-transform duration-500 ease-in-out ${
+                        isActive
+                          ? "translate-x-0 opacity-100 relative"
+                          : direction === "right"
+                          ? "translate-x-full opacity-0 absolute top-0 left-0 w-full"
+                          : "-translate-x-full opacity-0 absolute top-0 left-0 w-full"
+                      }`}
+                    >
+                      {tab === "ingredients" && (
+                        <ul className="list-disc list-inside text-gray-600 space-y-1">
+                          {product.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+                        </ul>
+                      )}
+                      {tab === "benefits" && (
+                        <ul className="list-disc list-inside text-gray-600 space-y-1">
+                          {product.benefits.map((b, i) => <li key={i}>{b}</li>)}
+                        </ul>
+                      )}
+                      {tab === "howToUse" && (
+                        <p className="text-gray-600">{product.howToUse}</p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         </div>
+      </section>
+
+      {/* Action Panel */}
+      <section className="w-full bg-[#E6F4EA]">
+        <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <span className="font-medium text-gray-800">Quantity</span>
+            <div className="flex items-center border rounded-lg overflow-hidden w-fit bg-white">
+              <button onClick={() => setQuantity((prev) => (prev > 1 ? prev - 1 : 1))} className="px-4 py-2 hover:bg-gray-100 transition">-</button>
+              <span className="px-6 py-2 text-gray-800 font-semibold">{quantity}</span>
+              <button onClick={() => setQuantity((prev) => prev + 1)} className="px-4 py-2 hover:bg-gray-100 transition">+</button>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <Button className="bg-[#0F5132] text-white rounded-full px-8 py-3 w-full sm:w-auto hover:bg-[#13472E] transition font-bold" onClick={() => handleAddToCart(quantity)}>Add to Cart</Button>
+            <Button className="bg-[#0F5132] text-white rounded-full px-8 py-3 w-full sm:w-auto hover:bg-[#13472E] transition font-bold" onClick={() => handleBuyNow(quantity)}>Buy Now</Button>
+          </div>
+
+          <div className="text-gray-700 text-sm text-center md:text-left">
+            <p>Order today and get it delivered by <span className="font-semibold">{getDeliveryDate()}</span></p>
+            <p className="mt-1">Free standard delivery on this product</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Reviews */}
+      <section className="max-w-6xl mx-auto px-4 py-10 space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800">Reviews</h2>
+        {product.reviewList?.map((rev, i) => (
+          <div key={i} className="bg-white p-6 rounded-xl shadow space-y-2">
+            <div className="flex items-center gap-2">
+              {[...Array(5)].map((_, idx) => (
+                <Star key={idx} className={`w-4 h-4 ${idx < rev.rating ? "fill-[#0F5132] text-[#0F5132]" : "text-gray-300"}`} />
+              ))}
+              <span className="text-gray-500 text-sm">{rev.name} - {rev.date}</span>
+            </div>
+            <p className="text-gray-600">{rev.comment}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* FAQs with Smooth Slide Animation */}
+      <section className="max-w-6xl mx-auto px-4 py-10 space-y-4">
+        <h2 className="text-2xl font-bold text-gray-800">FAQs</h2>
+        {product.faq?.map((faq, i) => {
+          const isOpen = faqOpenIndex === i
+          return (
+            <div
+              key={i}
+              className="bg-white p-6 rounded-xl shadow cursor-pointer"
+              onClick={() => setFaqOpenIndex(isOpen ? null : i)}
+            >
+              <h3 className="text-gray-800 font-semibold">{faq.q}</h3>
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  isOpen ? "max-h-96 mt-2" : "max-h-0"
+                }`}
+              >
+                <p className="text-gray-600">{faq.a}</p>
+              </div>
+            </div>
+          )
+        })}
       </section>
     </div>
   )

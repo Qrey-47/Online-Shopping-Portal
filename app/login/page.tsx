@@ -13,23 +13,37 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    const email = (e.currentTarget.email as HTMLInputElement).value
-    const password = (e.currentTarget.password as HTMLInputElement).value
+  const email = (e.currentTarget.email as HTMLInputElement).value;
+  const password = (e.currentTarget.password as HTMLInputElement).value;
 
-    if (email && password) {
-      // Mock login: store user in localStorage
-      const firstName = email.split("@")[0] // take part before @ as first name
-      localStorage.setItem("user", JSON.stringify({ email, firstName }))
-
-      // Redirect to homepage
-      router.push("/")
-    } else {
-      alert("Please enter email and password")
-    }
+  if (!email || !password) {
+    alert("Please enter email and password");
+    return;
   }
+
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (res.ok) {
+      const user: { id: number; email: string; firstName: string } = await res.json();
+      localStorage.setItem("user", JSON.stringify(user));
+      router.push("/");
+    } else {
+      const error = await res.json();
+      alert(error.message || "Login failed");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    alert("Something went wrong. Please try again.");
+  }
+};
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">
@@ -151,5 +165,6 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+    
   )
 }

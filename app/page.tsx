@@ -203,7 +203,7 @@ export default function HomePage() {
                           </div>
                         </div>
                         <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-serif rounded-full py-3 transition-all duration-300 hover:shadow-lg">
-                          Add to Cart
+                          View Product
                         </Button>
                       </div>
                     </CardContent>
