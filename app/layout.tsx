@@ -2,7 +2,8 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Manrope } from "next/font/google"
 import "./globals.css"
-import { CartProvider } from "@/app/context/CartContext" // <-- import your context
+import { CartProvider } from "@/app/Context/CartContext"
+import Navbar from "@/components/Navbar"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,9 +27,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${manrope.variable} antialiased`}>
       <body>
-        {/* CartProvider wraps all pages so cart state is accessible globally */}
         <CartProvider>
-          {children}
+          <Navbar />  {/* ✅ Global navbar */}
+          <main>{children}</main>
+         
         </CartProvider>
       </body>
     </html>

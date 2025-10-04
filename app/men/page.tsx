@@ -7,7 +7,6 @@ import { Star } from "lucide-react"
 import { products } from "../data/products"
 
 export default function MenPage() {
-  // Filter only men's products
   const menProducts = products.filter((p) => p.category === "men")
 
   return (
@@ -68,7 +67,7 @@ export default function MenPage() {
                         </div>
                       </div>
                       <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-serif rounded-full py-3 transition-all duration-300 hover:shadow-lg">
-                        Add to Cart
+                        View Product
                       </Button>
                     </div>
                   </CardContent>
